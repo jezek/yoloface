@@ -16,7 +16,7 @@ import colorsys
 import numpy as np
 import cv2
 
-from yolo.model import eval
+from model import eval
 
 from keras import backend as K
 from keras.models import load_model
