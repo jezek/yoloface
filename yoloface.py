@@ -40,6 +40,8 @@ parser.add_argument('--src', type=int, default=0,
                     help='source of the camera')
 parser.add_argument('--output-dir', type=str, default='outputs/',
                     help='path to the output directory')
+parser.add_argument('--gui', action='store_true',
+                    help='Show GUI')
 args = parser.parse_args()
 
 #####################################################################
@@ -66,8 +68,9 @@ net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
 
 def _main():
-    wind_name = 'face detection using YOLOv3'
-    cv2.namedWindow(wind_name, cv2.WINDOW_NORMAL)
+    if args.gui:
+        wind_name = 'face detection using YOLOv3'
+        cv2.namedWindow(wind_name, cv2.WINDOW_NORMAL)
 
     output_file = ''
 
@@ -102,12 +105,12 @@ def _main():
         # Stop the program if reached end of video
         if not has_frame:
             print('[i] ==> Done processing!!!')
-            print('[i] ==> Output file is stored at', os.path.join(args.output_dir, output_file))
+            print('[i] ==> Output file is stored at {}'.format(os.path.join(args.output_dir, output_file)))
             cv2.waitKey(1000)
             break
 
         # Create a 4D blob from a frame.
-        blob = cv2.dnn.blobFromImage(frame, 1 / 255, (IMG_WIDTH, IMG_HEIGHT),
+        blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (IMG_WIDTH, IMG_HEIGHT),
                                      [0, 0, 0], 1, crop=False)
 
         # Sets the input to the network
@@ -121,15 +124,16 @@ def _main():
         print('[i] ==> # detected faces: {}'.format(len(faces)))
         print('#' * 60)
 
-        # initialize the set of information we'll displaying on the frame
-        info = [
-            ('number of faces detected', '{}'.format(len(faces)))
-        ]
+        if args.gui:
+            # initialize the set of information we'll displaying on the frame
+            info = [
+                ('number of faces detected', '{}'.format(len(faces)))
+            ]
 
-        for (i, (txt, val)) in enumerate(info):
-            text = '{}: {}'.format(txt, val)
-            cv2.putText(frame, text, (10, (i * 20) + 20),
-                        cv2.FONT_HERSHEY_SIMPLEX, 0.7, COLOR_RED, 2)
+            for (i, (txt, val)) in enumerate(info):
+                text = '{}: {}'.format(txt, val)
+                cv2.putText(frame, text, (10, (i * 20) + 20),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, COLOR_RED, 2)
 
         # Save the output video to file
         if args.image:
@@ -137,7 +141,8 @@ def _main():
         else:
             video_writer.write(frame.astype(np.uint8))
 
-        cv2.imshow(wind_name, frame)
+        if args.gui:
+            cv2.imshow(wind_name, frame)
 
         key = cv2.waitKey(1)
         if key == 27 or key == ord('q'):

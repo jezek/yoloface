@@ -30,6 +30,7 @@ Temporary Items
 .idea/
 __pycache__/
 .vscode/
+*.pyc
 
 # Virtualenv
 venv/
