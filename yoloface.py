@@ -32,8 +32,8 @@ parser.add_argument('--model-cfg', type=str, default='./cfg/yolov3-face.cfg',
 parser.add_argument('--model-weights', type=str,
                     default='./model-weights/yolov3-wider_16000.weights',
                     help='path to weights of model')
-parser.add_argument('--image', type=str, default='',
-                    help='path to image file')
+parser.add_argument('--image', type=str, default='', nargs='+',
+                    help='path to image file(s)')
 parser.add_argument('--video', type=str, default='',
                     help='path to video file')
 parser.add_argument('--src', type=int, default=0,
@@ -75,11 +75,20 @@ def _main():
     output_file = ''
 
     if args.image:
-        if not os.path.isfile(args.image):
-            print("[!] ==> Input image file {} doesn't exist".format(args.image))
+        # validate images
+        for img in args.image:
+            if not os.path.isfile(img):
+                print("[!] ==> Input image file {} doesn't exist".format(img))
+                args.image.remove(img)
+
+        if len(args.image) == 0:
+            print("[!] ==> No images to detect faces on")
             sys.exit(1)
+
         cap = cv2.VideoCapture(args.image)
-        output_file = args.image[:-4].rsplit('/')[-1] + '_yoloface.jpg'
+        output_files = [img[:-4].rsplit('/')[-1] + '_yoloface.jpg' for img in args.image]
+        #TODO make cap contain images
+        sys.exit(0)
     elif args.video:
         if not os.path.isfile(args.video):
             print("[!] ==> Input video file {} doesn't exist".format(args.video))
