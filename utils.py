@@ -151,3 +151,17 @@ def refined_box(left, top, width, height):
     right = right + margin
 
     return left, top, right, bottom
+
+class ImageVideoCapture:
+    def __init__(self, images):
+        if not isinstance(images, (list,)):
+            raise ValueError("images is not a list type")
+        self.images = [img for img in images]
+
+    def read(self):
+        if len(self.images) == 0:
+            return (False, None)
+        return (True, cv2.imread(self.images.pop(0)))
+    
+    def release(self):
+        return

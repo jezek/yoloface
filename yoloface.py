@@ -85,10 +85,8 @@ def _main():
             print("[!] ==> No images to detect faces on")
             sys.exit(1)
 
-        cap = cv2.VideoCapture(args.image)
+        cap = ImageVideoCapture(args.image)
         output_files = [img[:-4].rsplit('/')[-1] + '_yoloface.jpg' for img in args.image]
-        #TODO make cap contain images
-        sys.exit(0)
     elif args.video:
         if not os.path.isfile(args.video):
             print("[!] ==> Input video file {} doesn't exist".format(args.video))
@@ -117,6 +115,10 @@ def _main():
             print('[i] ==> Output file is stored at {}'.format(os.path.join(args.output_dir, output_file)))
             cv2.waitKey(1000)
             break
+
+        if output_files: 
+            output_file = output_files.pop(0)
+
 
         # Create a 4D blob from a frame.
         blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (IMG_WIDTH, IMG_HEIGHT),
