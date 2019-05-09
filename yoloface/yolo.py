@@ -16,7 +16,7 @@ import colorsys
 import numpy as np
 import cv2
 
-from model import eval
+from yoloface.model import eval
 
 from keras import backend as K
 from keras.models import load_model
@@ -169,6 +169,7 @@ def letterbox_image(image, size):
 def detect_img(yolo):
     while True:
         img = input('*** Input image filename: ')
+        print("input: \"{}\"".format(img))
         try:
             image = Image.open(img)
         except:

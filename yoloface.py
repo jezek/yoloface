@@ -26,11 +26,13 @@ import os
 from utils import *
 
 #####################################################################
+fileDir = os.path.dirname(os.path.realpath(__file__))
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--model-cfg', type=str, default='./cfg/yolov3-face.cfg',
+parser.add_argument('--model-cfg', type=str, default=os.path.join(fileDir, 'cfg/yolov3-face.cfg'),
                     help='path to config file')
 parser.add_argument('--model-weights', type=str,
-                    default='./model-weights/yolov3-wider_16000.weights',
+                    default=os.path.join(fileDir, 'model-weights/yolov3-wider_16000.weights'),
                     help='path to weights of model')
 parser.add_argument('--image', type=str, default='', nargs='+',
                     help='path to image file(s)')

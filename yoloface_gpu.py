@@ -1,16 +1,19 @@
 import argparse
+import os
 
-from yolo.yolo import YOLO, detect_video, detect_img
+from yoloface.yolo import YOLO, detect_video, detect_img
 
+
+fileDir = os.path.dirname(os.path.realpath(__file__))
 
 #####################################################################
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model', type=str, default='model-weights/YOLO_Face.h5',
+    parser.add_argument('--model', type=str, default=os.path.join(fileDir, 'model-weights/YOLO_Face.h5'),
                         help='path to model weights file')
-    parser.add_argument('--anchors', type=str, default='cfg/yolo_anchors.txt',
+    parser.add_argument('--anchors', type=str, default=os.path.join(fileDir, 'cfg/yolo_anchors.txt'),
                         help='path to anchor definitions')
-    parser.add_argument('--classes', type=str, default='cfg/face_classes.txt',
+    parser.add_argument('--classes', type=str, default=os.path.join(fileDir, 'cfg/face_classes.txt'),
                         help='path to class definitions')
     parser.add_argument('--score', type=float, default=0.5,
                         help='the score threshold')
