@@ -23,16 +23,14 @@ import argparse
 import sys
 import os
 
-from utils import *
+from yoloface.utils import *
 
 #####################################################################
-fileDir = os.path.dirname(os.path.realpath(__file__))
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--model-cfg', type=str, default=os.path.join(fileDir, 'cfg/yolov3-face.cfg'),
+parser.add_argument('--model-cfg', type=str, default=yolov3_cfg_path,
                     help='path to config file')
-parser.add_argument('--model-weights', type=str,
-                    default=os.path.join(fileDir, 'model-weights/yolov3-wider_16000.weights'),
+parser.add_argument('--model-weights', type=str, default=yolov3_model_weights_path,
                     help='path to weights of model')
 parser.add_argument('--image', type=str, default='', nargs='+',
                     help='path to image file(s)')
@@ -62,14 +60,10 @@ if not os.path.exists(args.output_dir):
 else:
     print('==> Skipping create the {} directory...'.format(args.output_dir))
 
-# Give the configuration and weight files for the model and load the network
-# using them.
-net = cv2.dnn.readNetFromDarknet(args.model_cfg, args.model_weights)
-net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
-
-
 def _main():
+
+    detector = yolo_dnn_face_detection_model_v3(args.model_cfg, args.model_weights)
+
     if args.gui:
         wind_name = 'face detection using YOLOv3'
         cv2.namedWindow(wind_name, cv2.WINDOW_NORMAL)
@@ -114,28 +108,24 @@ def _main():
         # Stop the program if reached end of video
         if not has_frame:
             print('[i] ==> Done processing!!!')
-            print('[i] ==> Output file is stored at {}'.format(os.path.join(args.output_dir, output_file)))
+            if not args.image:
+                print('[i] ==> Output file is stored at {}'.format(os.path.join(args.output_dir, output_file)))
             cv2.waitKey(1000)
             break
 
         if output_files: 
             output_file = output_files.pop(0)
 
+        boxes = detector(frame)
 
-        # Create a 4D blob from a frame.
-        blob = cv2.dnn.blobFromImage(frame, 1.0 / 255, (IMG_WIDTH, IMG_HEIGHT),
-                                     [0, 0, 0], 1, crop=False)
+        print('[i] ==> # detected faces: {}'.format(len(boxes)))
 
-        # Sets the input to the network
-        net.setInput(blob)
+        for i, box in enumerate(boxes):
+            left, top, width, height, confidence = box
 
-        # Runs the forward pass to get output of the output layers
-        outs = net.forward(get_outputs_names(net))
-
-        # Remove the bounding boxes with low confidence
-        faces = post_process(frame, outs, CONF_THRESHOLD, NMS_THRESHOLD)
-        print('[i] ==> # detected faces: {}'.format(len(faces)))
-        print('#' * 60)
+            #draw_predict(frame, confidence, left, top, left + width, top + height)
+            left, top, right, bottom = refined_box(left, top, width, height)
+            draw_predict(frame, confidence, left, top, right, bottom)
 
         if args.gui:
             # initialize the set of information we'll displaying on the frame
@@ -151,6 +141,7 @@ def _main():
         # Save the output video to file
         if args.image:
             cv2.imwrite(os.path.join(args.output_dir, output_file), frame.astype(np.uint8))
+            print('[i] ==> Output file is stored at {}'.format(os.path.join(args.output_dir, output_file)))
         else:
             video_writer.write(frame.astype(np.uint8))
 
